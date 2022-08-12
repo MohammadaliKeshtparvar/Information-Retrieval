@@ -16,11 +16,11 @@ class PostingList:
     def __init__(self, posting: Posting):
         self.docIdPositionList: Dict[int, List[int]] = {posting.docId: posting.position}
         self.frequencyInDoc: Dict[int, int] = {posting.docId: 1}
-        # self.frequency = 1
+        self.frequency = 1
         self.allFrequency = 1
 
     def __insertPosting(self, posting: Posting):
-        # self.frequency += 1
+        self.frequency += 1
         self.allFrequency += 1
         self.docIdPositionList[posting.docId] = posting.position
         self.frequencyInDoc[posting.docId] = 1

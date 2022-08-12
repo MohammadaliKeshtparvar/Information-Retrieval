@@ -1,5 +1,6 @@
 import pickle
 import re
+import time
 
 from PreprocessingUtils import Preprocessing
 
@@ -57,6 +58,9 @@ def combine_list(list1, list2):
 # counts the number of repetitions in a list
 def count_doc_occurrence(doc_id_list):
     result, frequency = {}, 1
+    if len(doc_id_list) == 1:
+        result[doc_id_list.__getitem__(0)] = 1
+        return result
     try:
         for i in range(0, len(doc_id_list) - 1):
             if doc_id_list[i] == doc_id_list[i + 1]:
@@ -66,6 +70,8 @@ def count_doc_occurrence(doc_id_list):
                 frequency = 1
         if doc_id_list[-1] != doc_id_list[-2]:
             result[doc_id_list[-1]] = 1
+            return result
+        else:
             return result
     except IndexError:
         return result
@@ -154,17 +160,20 @@ def execute_phrasal_query(query: str):
     terms = preprocessing_query(query)
     terms = remove_duplicate(terms)
     res = []
-    if len(terms) == 1:
-        res = list(inverted_index[terms.__getitem__(0)].docIdPositionList.keys())
-    for i in range(0, len(terms) - 1):
-        if i == 0:
-            res = merge_doc_id(list(inverted_index[terms.__getitem__(i)].docIdPositionList.keys())
-                               , list(inverted_index[terms.__getitem__(i + 1)].docIdPositionList.keys()))
-        else:
-            res = merge_doc_id(res, list(inverted_index[terms.__getitem__(i + 1)].docIdPositionList.keys()))
-    result = find_phrase_with_position(res, terms)
-    print(f'phrase result = {result}')
-    return result
+    try:
+        if len(terms) == 1:
+            res = list(inverted_index[terms.__getitem__(0)].docIdPositionList.keys())
+        for i in range(0, len(terms) - 1):
+            if i == 0:
+                res = merge_doc_id(list(inverted_index[terms.__getitem__(i)].docIdPositionList.keys())
+                                   , list(inverted_index[terms.__getitem__(i + 1)].docIdPositionList.keys()))
+            else:
+                res = merge_doc_id(res, list(inverted_index[terms.__getitem__(i + 1)].docIdPositionList.keys()))
+        result = find_phrase_with_position(res, terms)
+        print(f'phrase result = {result}')
+        return result
+    except KeyError:
+        return {}
 
 
 def find_phrase_with_position(common_doc_id: list, terms: list) -> dict:
@@ -221,7 +230,7 @@ def find_not_query(terms: list) -> list:
 
 
 def print_result(result: dict, result_size: int):
-    print(f'{result_size} documents found that have at least 1 word of user query)')
+    print(f'{result_size} documents found that have at least 1 word of user query')
     print('----------------------------------------')
     print('The results are ranked in the following order')
     print(result)
@@ -271,6 +280,12 @@ def check_query_type(query):
     print_result(var, result_size)
 
 
+while True:
+    user_query = input('query : ')
+    start_time = time.time()
+    check_query_type(user_query)
+    print("--- %s seconds ---" % (time.time() - start_time))
+
 # check_query_type("امریکا ! فوتبال کشتی")
 # check_query_type("ایران ! فوتبال امریکا !")
 # check_query_type('امریکا انگلیس "گروه سوم جام جهانی" افریقا')
@@ -280,5 +295,6 @@ def check_query_type(query):
 # check_query_type('"کنگره ضدتروریست"')
 # check_query_type('"کنگره ضدتروریست" فوتبال')
 # check_query_type(' "تحریم هسته ای" امریکا ! ایران')
-check_query_type('اورشلیم ! صهیونیست')
+# check_query_type('اورشلیم ! صهیونیست')
 # check_query_type('"تحریم های هسته ای"')
+# check_query_type('زیمباوه')
